@@ -1,0 +1,33 @@
+.container {
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+  padding-right: 0.5rem;
+  padding-left: 0.5rem;
+  background-color: #282c34;
+  height: 40rem;
+  width: 20rem;
+  display: flex;
+  font-size: small;
+  flex-direction: column;
+  border: solid 2px rgb(11, 1, 97);
+  border-radius: 5px;
+  box-shadow: 0 2px 50px rgb(66, 97, 68);
+}
+
+.footer {
+  margin-top: 10px;
+  display: flex;
+  /* flex-direction: row; */
+}
+
+.title {
+  font-size: 24px;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  flex: 2;
+}
+
+.favorites {
+  /* display: block; */
+  /* flex: 1; */
+  margin-left: auto;
+}
