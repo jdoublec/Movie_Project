@@ -5,17 +5,17 @@ import {
   useMemo,
   useState,
 } from 'react';
-import Client from '../Data/client';
-import cssClass from './movie_provider.module.css';
-import logo from '../logo.svg';
 
-const MovieContext = createContext({
+import Client from '../Data/client';
+
+const MoviesContext = createContext({
   getMovies: () => Promise.resolve(),
-  movies: {},
+  getMovieById: () => Promise.resolve(),
+  sortedMovies: [],
   addFavorite: () => {},
   delFavorite: () => {},
-  orderMoviesBy: () => {},
   favorites: [],
+  getFavorites: () => {},
 });
 
 export const MovieProvider = ({ children }) => {
@@ -23,17 +23,7 @@ export const MovieProvider = ({ children }) => {
   const [sortedMovies, setSortedMovies] = useState([]);
   const [favorites, setFavorites] = useState([]);
 
-  const fetchMovies = useCallback(async () => {
-    const response = await Client.getMovies();
-    const { items } = response;
-    setMovies(items);
-  }, [setMovies]);
-
-  const getMovies = useCallback(async () => {
-    await fetchMovies();
-  }, [fetchMovies]);
-  
-  const orderMoviesBy = useMemo(() => {
+  const sortMovies = useCallback(() => {
     const notFavs = movies
       ?.filter((m) => !favorites?.some((f) => f.id === m.id))
       ?.sort((a, b) => {
@@ -46,24 +36,85 @@ export const MovieProvider = ({ children }) => {
         return 0;
       });
 
-    const favs = favorites?.sort((a, b) => {
-      const A = a?.title?.toUpperCase();
-      const B = b?.title?.toUpperCase();
+    const favs = movies
+      ?.filter((m) => favorites?.some((f) => f.id === m.id))
+      ?.sort((a, b) => {
+        const A = a?.title?.toUpperCase();
+        const B = b?.title?.toUpperCase();
 
-      if (A > B) return 1;
-      if (A < B) return -1;
+        if (A > B) return 1;
+        if (A < B) return -1;
 
-      return 0;
-    });
+        return 0;
+      });
 
     setSortedMovies([...favs, ...notFavs]);
-  }, [movies, favorites]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [movies, favorites]);
+
+  const fetchMovies = useCallback(async () => {
+    const response = await Client.getMovies();
+    const { items } = response;
+    setMovies(items);
+  }, [setMovies]);
+
+  useEffect(() => {
+    sortMovies();
+  }, [movies, sortMovies]);
+
+  const fetchMovieById = useCallback(
+    async (id) => {
+      const response = await Client.getMovieById(id);
+
+      setMovies((prev) => {
+        return prev.map((m) => {
+          if (m.id === id) {
+            return { ...m, desc: response };
+          }
+
+          return m;
+        });
+      });
+
+      if (favorites.some((f) => f.id === id)) {
+        setFavorites((prev) => {
+          return prev.map((f) => {
+            if (f.id === id) {
+              return { ...f, desc: response };
+            }
+
+            return f;
+          });
+        });
+      }
+    },
+    [favorites, setFavorites, setMovies],
+  );
+
+  const getMovies = useCallback(async () => {
+    await fetchMovies();
+  }, [fetchMovies]);
+
+  const getMovieById = useCallback(
+    (id) => {
+      const movie = movies.filter((m) => m.id === id);
+      if (!movie.desc) {
+        fetchMovieById(id);
+      }
+    },
+    [fetchMovieById, movies],
+  );
+
+  const getFavorites = useCallback(() => {
+    const current = movies.filter((m) => favorites.some((f) => f === m.id));
+
+    return current;
+  }, [movies, favorites]);
 
   const addFavorite = useCallback(
     (id) => {
-      const add = movies.find((m) => m.id === id);
+      const next = movies.find((m) => m.id === id);
       setFavorites((prev) => {
-        return [...prev, add];
+        return [...prev, next];
       });
     },
     [movies, setFavorites],
@@ -79,26 +130,34 @@ export const MovieProvider = ({ children }) => {
   const value = useMemo(
     () => ({
       getMovies,
-      movies: sortedMovies,
+      getMovieById,
+      sortedMovies,
       addFavorite,
       delFavorite,
-      orderMoviesBy,
       favorites,
+      getFavorites,
     }),
-    [getMovies, sortedMovies, addFavorite, delFavorite, orderMoviesBy, favorites],
+    [
+      getMovies,
+      getMovieById,
+      sortedMovies,
+      addFavorite,
+      delFavorite,
+      favorites,
+      getFavorites,
+    ],
   );
 
   useEffect(() => {
-    getMovies();
+    async function fetchData() {
+      await getMovies();
+    }
+    fetchData();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (!movies.length) {
-    return <img src={logo} className={cssClass.logo} alt="logo" />;
-  }
-
   return (
-    <MovieContext.Provider value={value}>{children}</MovieContext.Provider>
+    <MoviesContext.Provider value={value}>{children}</MoviesContext.Provider>
   );
 };
 
-export default MovieContext;
+export default MoviesContext;

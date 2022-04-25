@@ -1,14 +1,18 @@
 import './App.css';
+import { BrowserRouter } from 'react-router-dom';
+
 import Header from './App/Header/header';
-import Main from './App/Main/main';
 import { MovieProvider } from './Contexts/movie_provider';
+import Routes from './Routes/routes';
 
 function App() {
   return (
     <div className="App">
       <MovieProvider>
-        <Header />
-        <Main />
+        <BrowserRouter>
+          <Header />
+          <Routes />
+        </BrowserRouter>
       </MovieProvider>
     </div>
   );

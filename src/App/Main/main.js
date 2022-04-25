@@ -1,14 +1,18 @@
-import Card from '../../Components/Card/card';
-import cssClass from "./main.module.css";
-import useMovie from '../../Hooks/movie';
+import cssClass from './main.module.css';
 
-function Main() {
+import MovieComp from '../../Components/Movie/movie_comp';
+import logo from '../../logo.svg';
 
-  const {movies} = useMovie();
+function Main(props) {
+  const { movies } = props;
 
   return (
     <div className={cssClass.body}>
-      {movies && movies.map((movie) => <Card key={movie.id} movie={movie} />)}
+      {movies.length > 0 &&
+        movies.map((movie) => <MovieComp key={movie.id} movie={movie} />)}
+      {movies.length === 0 && (
+        <img src={logo} className={cssClass.logo} alt="logo" />
+      )}
     </div>
   );
 }

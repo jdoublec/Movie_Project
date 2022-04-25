@@ -8,3 +8,10 @@
   font-size: calc(10px + 2vmin);
   color: white;
 }
+
+button {
+  height: 2rem;
+  margin: 1rem;
+  background-color: #3f4552;
+  color: white;
+}

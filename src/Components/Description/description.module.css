@@ -1,4 +1,19 @@
+.card {
+  z-index: 9 !important;
+  width: 500px;
+}
 
+.endIcons {
+  margin-left: auto;
+}
+
+.descriptionHeader {
+  display: flex;
+}
+
+.description {
+  margin: 1rem;
+}
 
 .logo {
   height: 40vmin;
